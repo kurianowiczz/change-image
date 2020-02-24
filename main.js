@@ -12,17 +12,6 @@ image.addEventListener('load', () => {
 	sourceCanvas.height = image.height;
     sourceCtx.drawImage(image, 0, 0);
     let canvasWorker = new CanvasWorker(sourceCanvas);
-    /*for (let i = 0; i < 50; i ++){
-    	for (let j = 0; j < 50; j++) {
-    		canvasWorker.setPixel([255, 255, 255, 1], i, j);
-    	}
-    }
-    canvasWorker.saveImageData();
-    for (let i = 0; i < 50; i ++){
-    	for (let j = 0; j < 50; j++) {
-    		console.log(canvasWorker.getPixel(i, j));
-    	}
-    }*/
 });
 
 fileInput.addEventListener('change', () => {
