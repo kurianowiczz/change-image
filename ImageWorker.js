@@ -36,9 +36,9 @@ class CanvasWorker {
 	}
 
 	getPixel(iX, iY) {
-		aPixel = [];
+		var aPixel = [];
 		for (let iColorIndex = 0; iColorIndex < 4; iColorIndex++) {
-			aPixel.push(this._oCurrentImageData.data[iX * oImageData.width * 4 + iY * 4 + iColorIndex]);
+			aPixel.push(this._oCurrentImageData.data[iX * this._oImageData.width * 4 + iY * 4 + iColorIndex]);
 		}
 		return aPixel;
 	}
