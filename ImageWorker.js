@@ -2,7 +2,7 @@ class CanvasWorker {
 
 	constructor(oCanvas) {
 		this._oCanvas = oCanvas;
-		this._oContext = oCanvas.getContext("2d");
+		this._oContext = oCanvas.getContext('2d');
 		this._oImageData = this._oContext.getImageData(0, 0, oCanvas.width, oCanvas.height);
 		this._oCurrentImageData = this._oContext.getImageData(0, 0, oCanvas.width, oCanvas.height);
 	}
@@ -36,17 +36,16 @@ class CanvasWorker {
 	}
 
 	getPixel(iX, iY) {
-		var aPixel = [];
-		for (let iColorIndex = 0; iColorIndex < 4; iColorIndex++) {
-			aPixel.push(this._oCurrentImageData.data[iX * this._oImageData.width * 4 + iY * 4 + iColorIndex]);
-		}
-		return aPixel;
+		return [0, 1, 2, 3]
+			.map(iColorIndex => this._oCurrentImageData
+				.data[iX * this._oImageData.width * 4 + iY * 4 + iColorIndex]);
 	}
 
 	setPixel(aPixel, iX, iY) {
-		for (let iColorIndex = 0; iColorIndex < 4; iColorIndex++) {
-			this._oImageData.data[iX * this._oImageData.width * 4 + iY * 4 + iColorIndex] = aPixel[iColorIndex];
-		}
+		[0, 1, 2, 3]
+			.forEach(
+				iColorIndex => this._oImageData
+					.data[iX * this._oImageData.width * 4 + iY * 4 + iColorIndex] = aPixel[iColorIndex]);
 	}
 
 	saveImageData() {
