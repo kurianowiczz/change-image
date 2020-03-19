@@ -59,4 +59,43 @@ class CanvasWorker {
 	clear() {
 		this._oContext.clearRect(0, 0, this._oCanvas.width, this._oCanvas.height);
 	}
+
+	getBinArray() {
+		let aBinArray = [];
+		for (let i = 0; i < this.getWidth(); i++) {
+			aBinArray[i] = [];
+			for (let j = 0; j < this.getHeight(); j++) {
+				let pixel = this.getPixel(i, j);
+				if ( isBlackPixel(pixel) ) {
+					aBinArray[i][j] = 1
+				} else if( isWhitePixel(pixel) ) {
+					aBinArray[i][j] = 0;
+				}
+			}
+		}
+		return aBinArray;
+	}
+
+	/*shadeImage() {
+		let aBinArray = this.getBinArray();
+		let aShadedArray = [];
+		aBinArray.forEach((aRow, iX) => {
+			aShadedArray[ix] = [];
+			aBinArray.forEach((iPixel, iY) => {
+				if (iPixel !== 1) {
+
+				}
+			});
+		});
+	}*/
+
+	/*getSurroundingPixels(iX, iY, iWave) {
+		let aBinArray = this.getBinArray();
+		let aSurroundingPixels = [];
+		for(let i = 0; i < 9 * iWave; i++) {
+			mPixel = {};
+			mPixel.iX = iX;
+			mPixel.
+		}
+	}*/
 }

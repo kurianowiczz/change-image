@@ -45,15 +45,10 @@ const numberDecorator = (num) => `
 
 const writePixelMatrix = (canvasWorker) => {
 	let sPixelMatrix = '';
-
-	for (let i = 0; i < canvasWorker.getWidth(); i++) {
-		for (let j = 0; j < canvasWorker.getHeight(); j++) {
-			let pixel = canvasWorker.getPixel(i, j);
-			if ( isBlackPixel(pixel) ) {
-				sPixelMatrix += numberDecorator(1);
-			} else if( isWhitePixel(pixel) ) {
-				sPixelMatrix += numberDecorator(0);
-			}
+	let aBinArray = canvasWorker.getBinArray();
+	for (let i = 0; i < aBinArray.length; i++) {
+		for (let j = 0; j < aBinArray[0].length; j++) {
+			sPixelMatrix += numberDecorator(aBinArray[i][j]);
 		}
 	}
 	return sPixelMatrix;
@@ -62,6 +57,7 @@ const writePixelMatrix = (canvasWorker) => {
 const isBlackPixel = (pixel) => [0, 0, 0, 255].equals(pixel);
 
 const isWhitePixel = (pixel) => [255, 255, 255, 255].equals(pixel);
+
 
 
 
