@@ -47,7 +47,12 @@ const numberDecorator = (num) => `
 const writePixelMatrix = (canvasWorker) => {
 	let sPixelMatrix = '';
 	let aBinArray = canvasWorker.getBinArray();
-	console.log(canvasWorker.shadeImage());
+	let aShadedImageAndData = canvasWorker.shadeImage();
+	finishCanvas.width = image.width;
+	finishCanvas.height = image.height;
+	console.log(aShadedImageAndData[0]);
+	console.log(aShadedImageAndData[1]);
+	finishCanvas.getContext('2d').putImageData(aShadedImageAndData[1], 0, 0);
 	for (let i = 0; i < aBinArray.length; i++) {
 		for (let j = 0; j < aBinArray[0].length; j++) {
 			sPixelMatrix += numberDecorator(aBinArray[i][j]);

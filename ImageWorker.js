@@ -31,6 +31,10 @@ class CanvasWorker {
 		this._oCanvas.height = iHeight;
 	}
 
+	setImageData(oImageData) {
+		this._oContext.putImageData(oImageData, 0, 0);
+	}
+
 	getContext() {
 		return this._oContext;
 	}
@@ -81,23 +85,73 @@ class CanvasWorker {
 		let aShadedArray = [];
 		aBinArray.forEach((aRow, iX) => {
 			aShadedArray[iX] = [];
-			aBinArray.forEach((iPixel, iY) => {
+			aRow.forEach((iPixel, iY) => {
 				if (iPixel !== 1) {
-					let mPixel = undefined;
-					let iWave = 1;
-					while (mPixel === undefined) {
-						mPixel = this.getSurroundingPixels(iX, iY, iWave).find( elem => {
-							return elem.value === 1;
-						});
-						iWave++;
-					}
+					let mPixel = this._findChessNearestValue(iX, iY, elem => {
+						return elem.value === 1;
+					});
 					aShadedArray[iX][iY] = -this.getChessLength(iX, iY, mPixel.iX, mPixel.iY);
-				} else if (this.getSurroundingPixels(iX, iY, 1)) {
-
+				} else if (this._getSurroundingValue(iX, iY, 0) === undefined) {
+					let mPixel = this._findChessNearestValue(iX, iY, elem => {
+						return elem.value === 1 && this._getSurroundingValue(elem.iX, elem.iY, 0) !== undefined;
+					})
+					aShadedArray[iX][iY] = this.getChessLength(iX, iY, mPixel.iX, mPixel.iY) + 1;
+				} else {
+					aShadedArray[iX][iY] = 1;
 				}
 			});
 		});
-		return aShadedArray;
+		let mGradations = this._createGradation(aShadedArray);
+		aShadedArray = aShadedArray.map(aRow => {
+			return aRow.map(elem => {
+				return mGradations[String(elem)];
+			});
+		});
+		aShadedArray.forEach((aRow, iX) => {
+			aRow.forEach((elem, iY) => {
+				this.setPixel(this._formGrayPixel(elem), iX, iY);
+			});
+		});
+		let oImageData = this._oImageData;
+		this.resetImageData();
+		return [aShadedArray, oImageData];
+	}
+
+	_formGrayPixel(iGreyScale) {
+		return [iGreyScale, iGreyScale, iGreyScale, 255];
+	}
+
+	_createGradation(aShadedArray) {
+		let aGradations = [];
+		let mGradations = {};
+		aShadedArray.forEach(aRow => {
+			aRow.forEach(elem => {
+				if (!aGradations.includes(elem)) {
+					aGradations.push(elem);
+				}
+			});
+		});
+		let gradationStep = 255 / (aGradations.length - 1);
+		let gradation = 255;
+		aGradations = aGradations.forEach(elem => {
+			mGradations[String(elem)] = gradation;
+			gradation -= gradationStep;
+		});
+		return mGradations;
+	}
+
+	_findChessNearestValue(iX, iY, fCondition) {
+		let mPixel = undefined;
+		let iWave = 1;
+		while (mPixel === undefined) {
+			mPixel = this.getSurroundingPixels(iX, iY, iWave).find(fCondition);
+			iWave++;
+		}
+		return mPixel;
+	}
+
+	_getSurroundingValue(iX, iY, value) {
+		return this.getSurroundingPixels(iX, iY, 1).find(elem => elem.value === value);
 	}
 
 	getChessLength(iX1, iY1, iX2, iY2) {
