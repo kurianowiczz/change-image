@@ -12,7 +12,8 @@ const sourceCanvas = document.getElementsByClassName('source-img')[0],
     image = new Image(),
     fileInput = document.getElementsByClassName('file')[0],
     uploadBtn = document.getElementsByClassName('upload')[0],
-	imageMatrixSpan = document.getElementsByClassName('imageMatrix')[0];
+	imageMatrixSpan = document.getElementsByClassName('imageMatrix')[0],
+	changeBtn = $('.changeBtn')[0];
 
 image.addEventListener('load', () => {
 	sourceCanvas.width = image.width;
@@ -46,13 +47,14 @@ const numberDecorator = (num) => `
 const writePixelMatrix = (canvasWorker) => {
 	let sPixelMatrix = '';
 	let aBinArray = canvasWorker.getBinArray();
+	console.log(canvasWorker.shadeImage());
 	for (let i = 0; i < aBinArray.length; i++) {
 		for (let j = 0; j < aBinArray[0].length; j++) {
 			sPixelMatrix += numberDecorator(aBinArray[i][j]);
 		}
 	}
 	return sPixelMatrix;
-}
+};
 
 const isBlackPixel = (pixel) => [0, 0, 0, 255].equals(pixel);
 
