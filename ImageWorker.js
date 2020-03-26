@@ -133,7 +133,9 @@ class CanvasWorker {
 		});
 		let gradationStep = 255 / (aGradations.length - 1);
 		let gradation = 255;
-		aGradations = aGradations.sort();
+		aGradations.sort((elem1, elem2) => {
+			return elem1 - elem2;
+		});
 		aGradations = aGradations.forEach(elem => {
 			mGradations[String(elem)] = gradation;
 			gradation -= gradationStep;

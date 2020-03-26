@@ -56,11 +56,11 @@ const numberDecoratorNew = (num) => `
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	color: rgb(${new Array(3).fill(255 - num).join(', ')});
+	color: rgb(${new Array(3).fill(255 - num > 127 ? 255 : 0).join(', ')});
 	background-color: rgb(${new Array(3).fill(num).join(', ')});
 	border-radius: 3px;
 	">
-	${num}
+	${Math.round(num)}
 </div>
 `;
 
