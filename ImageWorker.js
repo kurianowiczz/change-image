@@ -94,7 +94,7 @@ class CanvasWorker {
 				} else if (this._getSurroundingValue(iX, iY, 0) === undefined) {
 					let mPixel = this._findChessNearestValue(iX, iY, elem => {
 						return elem.value === 1 && this._getSurroundingValue(elem.iX, elem.iY, 0) !== undefined;
-					})
+					});
 					aShadedArray[iX][iY] = this.getChessLength(iX, iY, mPixel.iX, mPixel.iY) + 1;
 				} else {
 					aShadedArray[iX][iY] = 1;
