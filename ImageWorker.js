@@ -101,6 +101,7 @@ class CanvasWorker {
 				}
 			});
 		});
+		let aDistanceArray = aShadedArray.slice();
 		let mGradations = this._createGradation(aShadedArray);
 		aShadedArray = aShadedArray.map(aRow => {
 			return aRow.map(elem => {
@@ -114,7 +115,7 @@ class CanvasWorker {
 		});
 		let oImageData = this._oImageData;
 		this.resetImageData();
-		return [aShadedArray, oImageData];
+		return [aShadedArray, oImageData, aDistanceArray];
 	}
 
 	_formGrayPixel(iGreyScale) {
@@ -197,5 +198,17 @@ class CanvasWorker {
 			aSurroundingPixels.push(mPixel);
 		}
 		return aSurroundingPixels;
+	}
+
+	getImageDataFromMatrix (pixelMatrix){
+		pixelMatrix.forEach( (row, i) => {
+			row.forEach( (pixel, j) => {
+				let color = pixel === 1 ? 0 : 255;
+				this.setPixel([color, color, color, 255], i, j);
+			});
+		});
+		let oImageData = this._oImageData;
+		this.resetImageData();
+		return oImageData;
 	}
 }
