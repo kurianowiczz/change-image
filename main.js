@@ -88,6 +88,7 @@ const numberDecoratorSave = (num) => `
 	background-color: ${num ? 'black': '#fafafa'};
 	color: ${num ? 'white' : 'black'};
 	border-radius: 3px;
+	cursor: default;
 	">
 	${num}
 </div>
