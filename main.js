@@ -24,16 +24,31 @@ image.addEventListener('load', () => {
 	const newMatrixDistance = writePixelMatrixDistance(canvasWorker);
 	imageMatrixSpan.innerHTML = matrix;
 	imageMatrixSpanNew.innerHTML = newMatrix;
-
 	const doc = document.getElementsByClassName('pixel-edit');
+	let isChanged = false
+	changePixel = oEvent => {
+		if(!isChanged && oEvent.buttons == 1) {
+			oEvent.target.innerHTML = '1'
+			oEvent.target.style.backgroundColor = 'black'
+			oEvent.target.style.color = 'white'
+			isChanged = true;
+		}
+		if(!isChanged && oEvent.buttons == 2) {
+			oEvent.target.innerHTML = '0';
+			oEvent.target.style.backgroundColor = '#fafafa';
+			oEvent.target.style.color = 'black';
+			isChanged = true;
+		}
+	};
+	resetChanged = () => {
+		isChanged = false;
+	};
 	for (let i = 0; i < doc.length; i++) {
-		doc[i].addEventListener('click', () => {
-			doc[i].innerHTML = doc[i].innerHTML === '1' ? '0' : '1';
-			doc[i].style.backgroundColor = doc[i].innerHTML === '1' ? 'black' : '#fafafa';
-			doc[i].style.color = doc[i].innerHTML === '1' ? 'white' : 'black';
-		});
+		doc[i].addEventListener('mouseout',resetChanged);
+		doc[i].addEventListener('mouseup', resetChanged);
+		doc[i].addEventListener('mousedown', changePixel);
+		doc[i].addEventListener('mouseover', changePixel)
 	}
-
 	imageMatrixSpanDistance.innerHTML = newMatrixDistance;
 	imageMatrixSpan.setAttribute('style', `
 	display: grid;
@@ -59,8 +74,8 @@ fileInput.addEventListener('change', () => {
 const numberDecorator = (num) => `
 <div style="
 	padding: 4px 10px;
-	background-color: ${num ? 'black': '#fafafa'};
-	color: ${num ? 'white' : 'black'};
+	background-color: #fafafa;
+	color: black;
 	border-radius: 3px;
 	">
 	${num}
@@ -69,8 +84,8 @@ const numberDecorator = (num) => `
 
 const numberDecoratorNew = (num) => `
 <div style="
-	width: 30px;
-	height: 30px;
+	width: 32px;
+	height: 32px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
