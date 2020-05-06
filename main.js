@@ -14,23 +14,25 @@ const sourceCanvas = document.getElementsByClassName('source-img')[0],
 	imageMatrixSpanNew = document.getElementsByClassName('imageMatrixNew')[0],
 	imageMatrixSpanDistance = document.getElementsByClassName('imageMatrixNewDistance')[0];
 
+const gistograms = document.getElementsByClassName('gistograma');
+
 image.addEventListener('load', () => {
 	sourceCanvas.width = image.width;
 	sourceCanvas.height = image.height;
     sourceCtx.drawImage(image, 0, 0);
 	const canvasWorker = new CanvasWorker(sourceCanvas);
-	const matrix = writePixelMatrix(canvasWorker);
-	const newMatrix = writePixelMatrixNew(canvasWorker);
+	const [matrix, binDataSet] = writePixelMatrix(canvasWorker);
+	const [newMatrix, rastushevkaDataSet] = writePixelMatrixNew(canvasWorker);
 	const newMatrixDistance = writePixelMatrixDistance(canvasWorker);
 	imageMatrixSpan.innerHTML = matrix;
 	imageMatrixSpanNew.innerHTML = newMatrix;
 	const doc = document.getElementsByClassName('pixel-edit');
-	let isChanged = false
+	let isChanged = false;
 	changePixel = oEvent => {
 		if(!isChanged && oEvent.buttons == 1) {
-			oEvent.target.innerHTML = '1'
-			oEvent.target.style.backgroundColor = 'black'
-			oEvent.target.style.color = 'white'
+			oEvent.target.innerHTML = '1';
+			oEvent.target.style.backgroundColor = 'black';
+			oEvent.target.style.color = 'white';
 			isChanged = true;
 		}
 		if(!isChanged && oEvent.buttons == 2) {
@@ -65,6 +67,63 @@ image.addEventListener('load', () => {
 	grid-template-columns: repeat(${canvasWorker.getWidth()}, max-content);
 	grid-gap: 3px 3px;
 	`);
+
+	const binary = {};
+	for (const bin of binDataSet) {
+		if (binary[bin]) {
+			binary[bin] += 1;
+		} else {
+			binary[bin] = 1;
+		}
+	}
+
+	const rastushevka = {};
+	for (const tone of rastushevkaDataSet) {
+		if (rastushevka[tone]) {
+			rastushevka[tone] += 1;
+		} else {
+			rastushevka[tone] = 1;
+		}
+	}
+
+	console.log(binary);
+
+	const chart1 = new Chart(
+		gistograms[0].getContext('2d'), {
+			type: 'bar',
+			data: {
+				labels: Object.keys(binary),
+				datasets: [{
+					label: 'binary',
+					data: Object.values(binary),
+				}],
+			},
+			options: {
+				scales: {
+					yAxes: [{
+						ticks: {
+							suggestedMin: 0,
+						},
+					}],
+				},
+			},
+		},
+	);
+
+	const chart2 = new Chart(
+		gistograms[1].getContext('2d'), {
+			type: 'bar',
+			data: {
+				labels: Object.keys(rastushevka),
+				datasets: [{
+					label: 'rastushevka',
+					data: Object.values(rastushevka),
+				}],
+			},
+			options: {},
+		},
+	);
+
 });
 
 fileInput.addEventListener('change', () => {
@@ -110,17 +169,20 @@ const numberDecoratorSave = (num) => `
 `;
 
 const writePixelMatrix = (canvasWorker) => {
+	const binDataSet = [];
 	let sPixelMatrix = '';
 	let aBinArray = canvasWorker.getBinArray();
 	for (let i = 0; i < aBinArray.length; i++) {
 		for (let j = 0; j < aBinArray[0].length; j++) {
+			binDataSet.push(aBinArray[i][j]);
 			sPixelMatrix += numberDecoratorSave(aBinArray[i][j]);
 		}
 	}
-	return sPixelMatrix;
+	return [sPixelMatrix, binDataSet];
 };
 
 const writePixelMatrixNew = (canvasWorker) => {
+	const rastushevkaDataSet = [];
 	let sPixelMatrix = '';
 	let aShadedImageAndData = canvasWorker.shadeImage();
 	finishCanvas.width = image.width;
@@ -128,10 +190,12 @@ const writePixelMatrixNew = (canvasWorker) => {
 	finishCanvas.getContext('2d').putImageData(aShadedImageAndData[1], 0, 0);
 	for (let i = 0; i < aShadedImageAndData[0].length; i++) {
 		for (let j = 0; j < aShadedImageAndData[0][0].length; j++) {
+			rastushevkaDataSet.push(Math.round(aShadedImageAndData[0][i][j]));
 			sPixelMatrix += numberDecoratorNew(aShadedImageAndData[0][i][j]);
 		}
 	}
-	return sPixelMatrix;
+	console.log('sp', sPixelMatrix);
+	return [sPixelMatrix, rastushevkaDataSet];
 };
 
 const writePixelMatrixDistance = (canvasWorker) => {
@@ -148,7 +212,6 @@ const writePixelMatrixDistance = (canvasWorker) => {
 const isBlackPixel = (pixel) => [0, 0, 0, 255].equals(pixel);
 
 const isWhitePixel = (pixel) => [255, 255, 255, 255].equals(pixel);
-
 
 
 
