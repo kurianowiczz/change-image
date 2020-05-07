@@ -8,126 +8,223 @@ Array.prototype.equals = equals;
 const sourceCanvas = document.getElementsByClassName('source-img')[0],
 	finishCanvas = document.getElementsByClassName('finish-img')[0],
 	sourceCtx = sourceCanvas.getContext('2d'),
+	finishCtx = finishCanvas.getContext('2d'),
     image = new Image(),
-    fileInput = document.getElementsByClassName('file')[0],
+    halftoneImage = new Image(),
+    binaryImageFileInput = document.getElementsByClassName('binary-image-file-input')[0],
+    halftoneImageFileInput = document.getElementsByClassName('halftone-image-file-input')[0],
 	imageMatrixSpan = document.getElementsByClassName('imageMatrix')[0],
 	imageMatrixSpanNew = document.getElementsByClassName('imageMatrixNew')[0],
-	imageMatrixSpanDistance = document.getElementsByClassName('imageMatrixNewDistance')[0];
+	imageMatrixSpanDistance = document.getElementsByClassName('imageMatrixNewDistance')[0],
+	binarizeThresholdInput = document.getElementsByClassName('binarize-threshold-input')[0],
+	binarizeThresholdInputLabel = document.getElementsByClassName('binarize-threshold-input-label')[0];
 
 const gistograms = document.getElementsByClassName('gistograma');
+
+const shadeImage = canvasWorker => {
+	const [newMatrix, rastushevkaDataSet] = writePixelMatrixNew(canvasWorker);
+    const newMatrixDistance = writePixelMatrixDistance(canvasWorker);
+    imageMatrixSpanNew.innerHTML = newMatrix;
+    imageMatrixSpanDistance.innerHTML = newMatrixDistance;
+    imageMatrixSpanNew.setAttribute('style', `
+    display: grid;
+    grid-template-columns: repeat(${canvasWorker.getWidth()}, max-content);
+    grid-gap: 3px 3px;
+    `);
+    imageMatrixSpanDistance.setAttribute('style', `
+    display: grid;
+    grid-template-columns: repeat(${canvasWorker.getWidth()}, max-content);
+    grid-gap: 3px 3px;
+    `);
+
+    const rastushevka = {};
+    for (const tone of rastushevkaDataSet) {
+        if (rastushevka[tone]) {
+            rastushevka[tone] += 1;
+        } else {
+            rastushevka[tone] = 1;
+        }
+    }
+    const chart2 = new Chart(
+        gistograms[1].getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: Object.keys(rastushevka),
+                datasets: [{
+                    label: 'rastushevka',
+                    data: Object.values(rastushevka),
+                }],
+            },
+            options: {},
+        },
+    );
+};
+
+const binarizeImage = (canvasWorker, iThreshold) => {
+    const [matrix, binDataSet] = writeBinarizedMatrix(canvasWorker, iThreshold);
+    imageMatrixSpan.innerHTML = matrix;
+    imageMatrixSpan.setAttribute('style', `
+    display: grid;
+    grid-template-columns: repeat(${canvasWorker.getWidth()}, max-content);
+    grid-gap: 3px 3px;
+    `);
+    const binary = {};
+    for (const bin of binDataSet) {
+        if (binary[bin]) {
+            binary[bin] += 1;
+        } else {
+            binary[bin] = 1;
+        }
+    }
+    const chart1 = new Chart(
+        gistograms[0].getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: Object.keys(binary),
+                datasets: [{
+                    label: 'binary',
+                    data: Object.values(binary),
+                }],
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            suggestedMin: 0,
+                        },
+                    }],
+                },
+            },
+        },
+    );
+}
 
 image.addEventListener('load', () => {
 	sourceCanvas.width = image.width;
 	sourceCanvas.height = image.height;
     sourceCtx.drawImage(image, 0, 0);
-	const canvasWorker = new CanvasWorker(sourceCanvas);
-	const [matrix, binDataSet] = writePixelMatrix(canvasWorker);
-	const [newMatrix, rastushevkaDataSet] = writePixelMatrixNew(canvasWorker);
-	const newMatrixDistance = writePixelMatrixDistance(canvasWorker);
-	imageMatrixSpan.innerHTML = matrix;
-	imageMatrixSpanNew.innerHTML = newMatrix;
-	const doc = document.getElementsByClassName('pixel-edit');
-	let isChanged = false;
-	changePixel = oEvent => {
-		if(!isChanged && oEvent.buttons == 1) {
-			oEvent.target.innerHTML = '1';
-			oEvent.target.style.backgroundColor = 'black';
-			oEvent.target.style.color = 'white';
-			isChanged = true;
-		}
-		if(!isChanged && oEvent.buttons == 2) {
-			oEvent.target.innerHTML = '0';
-			oEvent.target.style.backgroundColor = '#fafafa';
-			oEvent.target.style.color = 'black';
-			isChanged = true;
-		}
-	};
-	resetChanged = () => {
-		isChanged = false;
-	};
-	for (let i = 0; i < doc.length; i++) {
-		doc[i].addEventListener('mouseout',resetChanged);
-		doc[i].addEventListener('mouseup', resetChanged);
-		doc[i].addEventListener('mousedown', changePixel);
-		doc[i].addEventListener('mouseover', changePixel)
-	}
-	imageMatrixSpanDistance.innerHTML = newMatrixDistance;
-	imageMatrixSpan.setAttribute('style', `
-	display: grid;
-	grid-template-columns: repeat(${canvasWorker.getWidth()}, max-content);
-	grid-gap: 3px 3px;
-	`);
-	imageMatrixSpanNew.setAttribute('style', `
-	display: grid;
-	grid-template-columns: repeat(${canvasWorker.getWidth()}, max-content);
-	grid-gap: 3px 3px;
-	`);
-	imageMatrixSpanDistance.setAttribute('style', `
-	display: grid;
-	grid-template-columns: repeat(${canvasWorker.getWidth()}, max-content);
-	grid-gap: 3px 3px;
-	`);
-
-	const binary = {};
-	for (const bin of binDataSet) {
-		if (binary[bin]) {
-			binary[bin] += 1;
-		} else {
-			binary[bin] = 1;
-		}
-	}
-
-	const rastushevka = {};
-	for (const tone of rastushevkaDataSet) {
-		if (rastushevka[tone]) {
-			rastushevka[tone] += 1;
-		} else {
-			rastushevka[tone] = 1;
-		}
-	}
-
-	console.log(binary);
-
-	const chart1 = new Chart(
-		gistograms[0].getContext('2d'), {
-			type: 'bar',
-			data: {
-				labels: Object.keys(binary),
-				datasets: [{
-					label: 'binary',
-					data: Object.values(binary),
-				}],
-			},
-			options: {
-				scales: {
-					yAxes: [{
-						ticks: {
-							suggestedMin: 0,
-						},
-					}],
-				},
-			},
-		},
-	);
-
-	const chart2 = new Chart(
-		gistograms[1].getContext('2d'), {
-			type: 'bar',
-			data: {
-				labels: Object.keys(rastushevka),
-				datasets: [{
-					label: 'rastushevka',
-					data: Object.values(rastushevka),
-				}],
-			},
-			options: {},
-		},
-	);
-
+    const canvasWorker = new CanvasWorker(sourceCanvas);
+    const [matrix, binDataSet] = writePixelMatrix(canvasWorker);
+    imageMatrixSpan.innerHTML = matrix;
+    const doc = document.getElementsByClassName('pixel-edit');
+    let isChanged = false;
+    changePixel = oEvent => {
+        if(!isChanged && oEvent.buttons == 1) {
+            oEvent.target.innerHTML = '1';
+            oEvent.target.style.backgroundColor = 'black';
+            oEvent.target.style.color = 'white';
+            isChanged = true;
+        }
+        if(!isChanged && oEvent.buttons == 2) {
+            oEvent.target.innerHTML = '0';
+            oEvent.target.style.backgroundColor = '#fafafa';
+            oEvent.target.style.color = 'black';
+            isChanged = true;
+        }
+        const doc = document.getElementsByClassName('pixel-edit');
+	    let arr = [[]];
+	    let counter = 0;
+	    for (let i = 0, j = 0; i < doc.length; i++){
+	        if(counter === Math.sqrt(doc.length)) {
+	            j++;
+	            arr[j] = [];
+	            counter = 0;
+	        }
+	        arr[j].push(Number(doc[i].innerText));
+	        counter++;
+	    }
+	    canvasWorker.setImageData(CanvasWorker.getImageDataFromMatrix(arr), 0, 0);
+    };
+    resetChanged = () => {
+        isChanged = false;
+    };
+    for (let i = 0; i < doc.length; i++) {
+        doc[i].addEventListener('mouseout',resetChanged);
+        doc[i].addEventListener('mouseup', resetChanged);
+        doc[i].addEventListener('mousedown', changePixel);
+        doc[i].addEventListener('mouseover', changePixel)
+    }
+    imageMatrixSpan.setAttribute('style', `
+    display: grid;
+    grid-template-columns: repeat(${canvasWorker.getWidth()}, max-content);
+    grid-gap: 3px 3px;
+    `);
+    const binary = {};
+    for (const bin of binDataSet) {
+        if (binary[bin]) {
+            binary[bin] += 1;
+        } else {
+            binary[bin] = 1;
+        }
+    }
+    const chart1 = new Chart(
+        gistograms[0].getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: Object.keys(binary),
+                datasets: [{
+                    label: 'binary',
+                    data: Object.values(binary),
+                }],
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            suggestedMin: 0,
+                        },
+                    }],
+                },
+            },
+        },
+    );
+    shadeImage(canvasWorker);
 });
 
-fileInput.addEventListener('change', () => {
-   image.src = window.URL.createObjectURL(fileInput.files[0]);
+halftoneImage.addEventListener('load', () => {
+	finishCanvas.width = halftoneImage.width;
+	finishCanvas.height = halftoneImage.height;
+    finishCtx.drawImage(halftoneImage, 0, 0);
+    const canvasWorker = new CanvasWorker(finishCanvas);
+	const [newMatrix, rastushevkaDataSet] = writeHalfToneMatrix(canvasWorker);
+    imageMatrixSpanNew.innerHTML = newMatrix;
+    imageMatrixSpanNew.setAttribute('style', `
+    display: grid;
+    grid-template-columns: repeat(${canvasWorker.getWidth()}, max-content);
+    grid-gap: 3px 3px;
+    `);
+    const rastushevka = {};
+    for (const tone of rastushevkaDataSet) {
+        if (rastushevka[tone]) {
+            rastushevka[tone] += 1;
+        } else {
+            rastushevka[tone] = 1;
+        }
+    }
+    const chart2 = new Chart(
+        gistograms[1].getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: Object.keys(rastushevka),
+                datasets: [{
+                    label: 'rastushevka',
+                    data: Object.values(rastushevka),
+                }],
+            },
+            options: {},
+        },
+    );
+    binarizeImage(canvasWorker);
+});
+
+binaryImageFileInput.addEventListener('change', () => {
+	image.src = "";
+	image.src = window.URL.createObjectURL(binaryImageFileInput.files[0]);
+});
+
+halftoneImageFileInput.addEventListener('change', () => {
+	halftoneImage.src = "";
+	halftoneImage.src = window.URL.createObjectURL(halftoneImageFileInput.files[0]);
 });
 
 const numberDecorator = (num) => `
@@ -168,6 +265,47 @@ const numberDecoratorSave = (num) => `
 </div>
 `;
 
+const writeHalfToneMatrix = (canvasWorker) => {
+	const rastushevkaDataSet = [];
+	let sPixelMatrix = '';
+	let aHalftoneMatrix = canvasWorker.getHalftoneMatrix();
+	for (let i = 0; i < aHalftoneMatrix.length; i++) {
+		for (let j = 0; j < aHalftoneMatrix[0].length; j++) {
+			rastushevkaDataSet.push(Math.round(aHalftoneMatrix[i][j]));
+			sPixelMatrix += numberDecoratorNew(aHalftoneMatrix[i][j]);
+		}
+	}
+	return [sPixelMatrix, rastushevkaDataSet];
+};
+
+const writeBinarizedMatrix = (canvasWorker, iThreshold) => {
+	let iThresholdCopy = iThreshold;
+	if (!iThresholdCopy) {
+		let aHalftoneMatrix = canvasWorker.getHalftoneMatrix(),
+		    iPixelsSum = 0,
+		    iPixelsNumber = aHalftoneMatrix.length * aHalftoneMatrix.length;
+		aHalftoneMatrix.forEach(aRow => {
+			aRow.forEach(iPixel => {
+				iPixelsSum += iPixel;
+			}); 
+		});
+		iThresholdCopy = iPixelsSum / iPixelsNumber;
+		binarizeThresholdInput.value = Math.round(iThresholdCopy);
+		binarizeThresholdInputLabel.innerHTML = "Choose Threshold: " + Math.round(iThresholdCopy);
+	}
+	const binDataSet = [];
+	let sPixelMatrix = '';
+	let [oImageData, aBinArray] = canvasWorker.binarizeImage(iThresholdCopy);
+	sourceCtx.putImageData(oImageData, 0, 0);
+	for (let i = 0; i < aBinArray.length; i++) {
+		for (let j = 0; j < aBinArray[0].length; j++) {
+			binDataSet.push(aBinArray[i][j]);
+			sPixelMatrix += numberDecoratorSave(aBinArray[i][j]);
+		}
+	}
+	return [sPixelMatrix, binDataSet];
+};
+
 const writePixelMatrix = (canvasWorker) => {
 	const binDataSet = [];
 	let sPixelMatrix = '';
@@ -194,7 +332,7 @@ const writePixelMatrixNew = (canvasWorker) => {
 			sPixelMatrix += numberDecoratorNew(aShadedImageAndData[0][i][j]);
 		}
 	}
-	console.log('sp', sPixelMatrix);
+	// console.log('sp', sPixelMatrix);
 	return [sPixelMatrix, rastushevkaDataSet];
 };
 

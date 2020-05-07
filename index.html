@@ -19,30 +19,44 @@
     <div class="container">
         <div class="input-group mb-3">
           <div class="input-group-prepend">
-            <span class="input-group-text" id="inputGroupFileAddon01">Upload</span>
+            <button class="btn btn-primary shadeImage">Shade Image</button>
           </div>
           <div class="custom-file">
-            <input type="file" class="custom-file-input file" id="inputGroupFile01" aria-describedby="inputGroupFileAddon01">
-            <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+            <input type="file" class="custom-file-input binary-image-file-input" id="inputGroupFile01" aria-describedby="inputGroupFileAddon01">
+            <label class="custom-file-label" for="inputGroupFile01">Choose Binary Image</label>
+        </div>
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <button class="btn btn-primary binarizeImage">Binarize image</button>
+          </div>
+          <div class="custom-file">
+            <input type="file" class="custom-file-input halftone-image-file-input" id="inputGroupFile02" aria-describedby="inputGroupFileAddon03">
+            <label class="custom-file-label" for="inputGroupFile02">Choose Halftone Image</label>
           </div>
         </div>
-        <button class="btn btn-primary saveBtn">Save</button>
-        <button class="btn btn-primary saveBtnNew">Save New</button>
+        <div class="input-group">
+            <label for="formControlRange" class="binarize-threshold-input-label">Choose Threshold: 128</label>
+            <input type="range" class="form-control-range binarize-threshold-input" id="formControlRange" min="0" max="255" value="128">
+        </div>
+        <div>
+            <button class="btn btn-primary saveBtn">Save Shaded Image</button>
+            <button class="btn btn-primary saveBtnNew">Save Binary Image</button>
+        </div><br>
         <div class="images">
             <canvas class="source-img"></canvas>
             <canvas class="finish-img"></canvas>
         </div>
         <div class="matrixContainers">
             <div class="matrixContainer">
-            <div class="imageMatrix" style="display: grid;"></div>
+                <div class="imageMatrix" style="display: grid;"></div>
             </div>
             <div class="matrixContainer">
-            <div class="imageMatrixNew" style="display: grid;"></div>
+                <div class="imageMatrixNew" style="display: grid;"></div>
             </div>
             <div class="matrixContainer">
-            <div class="imageMatrixNewDistance" style="display: grid;"></div>
+                <div class="imageMatrixNewDistance" style="display: grid;"></div>
             </div>
-        </div>
+        </div><br>
         <div>
             <canvas class="gistograma"></canvas>
             <canvas class="gistograma"></canvas>

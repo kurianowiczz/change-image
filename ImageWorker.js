@@ -33,6 +33,8 @@ class CanvasWorker {
 
 	setImageData(oImageData) {
 		this._oContext.putImageData(oImageData, 0, 0);
+		this._oImageData = oImageData;
+		this._oCurrentImageData = oImageData;
 	}
 
 	getContext() {
@@ -80,6 +82,18 @@ class CanvasWorker {
 		return aBinArray;
 	}
 
+	getHalftoneMatrix() {
+		let aHalftoneMatrix = [];
+		for (let i = 0; i < this.getWidth(); i++) {
+			aHalftoneMatrix[i] = [];
+			for (let j = 0; j < this.getHeight(); j++) {
+				let pixel = this.getPixel(i, j);
+				aHalftoneMatrix[i][j] = pixel[0];
+			}
+		}
+		return aHalftoneMatrix;
+	}
+
 	shadeImage() {
 		let aBinArray = this.getBinArray();
 		let aShadedArray = [];
@@ -116,6 +130,22 @@ class CanvasWorker {
 		let oImageData = this._oImageData;
 		this.resetImageData();
 		return [aShadedArray, oImageData, aDistanceArray];
+	}
+
+	binarizeImage(iThresHold) {
+		let aHalftoneMatrix = this.getHalftoneMatrix(),
+		    aBinMatrix = [];
+		aHalftoneMatrix.forEach((aRow, iX) => {
+			aBinMatrix[iX] = [];
+			aRow.forEach((iPixel, iY) => {
+				let aPixel = iPixel > iThresHold ? [255, 255, 255, 255] : [0, 0, 0, 255];
+			    this.setPixel(aPixel, iX, iY);
+			    aBinMatrix[iX][iY] = iPixel > iThresHold ? 0 : 1;
+			});
+		});
+		let oImageData = this._oImageData;
+		this.resetImageData();
+		return [oImageData, aBinMatrix];
 	}
 
 	_formGrayPixel(iGreyScale) {
@@ -200,15 +230,22 @@ class CanvasWorker {
 		return aSurroundingPixels;
 	}
 
-	getImageDataFromMatrix (pixelMatrix){
+	static getImageDataFromMatrix (pixelMatrix){
+		let oImageData = new ImageData(pixelMatrix.length, pixelMatrix[0].length),
+		    iImageDataIndex = 0;
 		pixelMatrix.forEach( (row, i) => {
 			row.forEach( (pixel, j) => {
 				let color = pixel === 1 ? 0 : 255;
-				this.setPixel([color, color, color, 255], i, j);
+				oImageData.data[iImageDataIndex] = color;
+				iImageDataIndex++;
+				oImageData.data[iImageDataIndex] = color;
+				iImageDataIndex++;
+				oImageData.data[iImageDataIndex] = color;
+				iImageDataIndex++;
+				oImageData.data[iImageDataIndex] = 255;
+				iImageDataIndex++;
 			});
 		});
-		let oImageData = this._oImageData;
-		this.resetImageData();
 		return oImageData;
 	}
 }

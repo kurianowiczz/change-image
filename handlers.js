@@ -12,26 +12,9 @@ saveBtn.addEventListener('click', () => {
 });
 
 const saveBtnNew = document.getElementsByClassName('saveBtnNew')[0],
-    downloadsCanvas = document.createElement('canvas');
+    downloadsCanvas = document.getElementsByClassName('source-img')[0];
 downloadsCanvas.className = 'Save-new';
 saveBtnNew.addEventListener('click', () => {
-    const doc = document.getElementsByClassName('pixel-edit');
-    let canvasWorker = new CanvasWorker(downloadsCanvas);
-    let arr = [[]];
-    let counter = 0;
-    for (let i = 0, j = 0; i < doc.length; i++){
-        if(counter === Math.sqrt(doc.length)) {
-            j++;
-            arr[j] = [];
-            counter = 0;
-        }
-        arr[j].push(Number(doc[i].innerText));
-        counter++;
-    }
-    downloadsCanvas.width = sourceCanvas.width;
-    downloadsCanvas.height = sourceCanvas.height;
-    console.log(canvasWorker.getImageDataFromMatrix(arr))
-    downloadsCanvas.getContext('2d').putImageData(canvasWorker.getImageDataFromMatrix(arr),0,0);
     const link = document.createElement('a');
     link.setAttribute('download', 'resultImg.bmp');
     link.setAttribute('href', downloadsCanvas.toDataURL("image/bmp").replace("image/bmp",
@@ -43,5 +26,25 @@ saveBtnNew.addEventListener('click', () => {
 
 });
 
+const shadeImageBtn = document.getElementsByClassName('shadeImage')[0];
+shadeImageBtn.addEventListener('click', () => {
+    const canvasWorker = new CanvasWorker(sourceCanvas);
+    shadeImage(canvasWorker);
+});
+
+binarizeThresholdInput.addEventListener('input', () => {
+    binarizeThresholdInputLabel.innerHTML = "Choose Threshold: " + binarizeThresholdInput.value;
+});
+
+binarizeThresholdInput.addEventListener('change', () => {
+    const canvasWorker = new CanvasWorker(finishCanvas);
+    binarizeImage(canvasWorker, binarizeThresholdInput.value);
+})
+
+let binarizeImageBtn = document.getElementsByClassName('binarizeImage')[0];
+binarizeImageBtn.addEventListener('click', () => {
+    const canvasWorker = new CanvasWorker(finishCanvas);
+    binarizeImage(canvasWorker); 
+});
 
 
