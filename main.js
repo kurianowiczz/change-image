@@ -291,6 +291,7 @@ const writeBinarizedMatrix = (canvasWorker, iThreshold) => {
 		});
 		iThresholdCopy = iPixelsSum / iPixelsNumber;
 		binarizeThresholdInput.value = Math.round(iThresholdCopy);
+		iThresholdCopy = 255 - iThresholdCopy;
 		binarizeThresholdInputLabel.innerHTML = "Choose Threshold: " + Math.round(iThresholdCopy);
 	}
 	const binDataSet = [];

@@ -138,9 +138,20 @@ class CanvasWorker {
 		aHalftoneMatrix.forEach((aRow, iX) => {
 			aBinMatrix[iX] = [];
 			aRow.forEach((iPixel, iY) => {
-				let aPixel = iPixel > iThresHold ? [255, 255, 255, 255] : [0, 0, 0, 255];
+			    let aFirstWave = this.getSurroundingHalftonePixels(iX, iY, 1),
+			        aPixel,
+			        iBinPixel;
+			    for (let i = 0; i < aFirstWave.length; i++) {
+			    	if (aFirstWave[i].value <= iThresHold) {
+			    	    aPixel =  [0, 0, 0, 255];
+			    	    iBinPixel = 1;
+			    	    break;
+			    	}
+			    	aPixel = [255, 255, 255];
+			    	iBinPixel = 0;
+			    }
 			    this.setPixel(aPixel, iX, iY);
-			    aBinMatrix[iX][iY] = iPixel > iThresHold ? 0 : 1;
+			    aBinMatrix[iX][iY] = iBinPixel;
 			});
 		});
 		let oImageData = this._oImageData;
@@ -225,6 +236,35 @@ class CanvasWorker {
 			mPixel.iX = iX + iTempX;
 			mPixel.iY = iY + iTempY;
 			mPixel.value = aBinArray[iX + iTempX][iY + iTempY];
+			aSurroundingPixels.push(mPixel);
+		}
+		return aSurroundingPixels;
+	}
+
+	getSurroundingHalftonePixels(iX, iY, iWave) {
+		let aHalftoneMatrix = this.getHalftoneMatrix();
+		let aSurroundingPixels = [];
+		let iTempX = iWave;
+		let iTempY = iWave;
+		for(let i = 0; i < 8 * iWave; i++) {
+			let mPixel = {};
+			if( iTempX >= (-iWave + 1) && iTempX <= iWave && iTempY === iWave ) {
+				iTempX -= 1;
+			} else if (iTempX === -iWave && iTempY >= (-iWave + 1) && iTempY <= iWave ) {
+				iTempY -= 1;
+			} else if (iTempX >= -iWave && iTempX <= (iWave - 1) && iTempY === -iWave) {
+				iTempX += 1;
+			} else  if (iTempX === iWave && iTempY >= -iWave && iTempY <= (iWave - 1)) {
+				iTempY += 1;
+			}
+			if ((iX + iTempX) < 0 || (iY + iTempY) < 0 || (iX + iTempX) >= aHalftoneMatrix.length
+				|| (iY + iTempY) >= aHalftoneMatrix[0].length ) {
+				continue;
+
+			}
+			mPixel.iX = iX + iTempX;
+			mPixel.iY = iY + iTempY;
+			mPixel.value = aHalftoneMatrix[iX + iTempX][iY + iTempY];
 			aSurroundingPixels.push(mPixel);
 		}
 		return aSurroundingPixels;
