@@ -61,8 +61,41 @@
             <canvas class="gistograma"></canvas>
             <canvas class="gistograma"></canvas>
         </div>
-    </div>
+<!--            <div>-->
+<!--                <input id="sizeX">-->
+<!--                x-->
+<!--                <input id="sizeY">-->
+<!--                <button class="btn btn-primary">Generate</button>-->
+<!--            </div>-->
 
+            <div class="mask">
+
+            </div>
+        </div>
+    </div>
+    <script>
+        (() => {
+            const maskContainer = document.getElementsByClassName('mask')[0];
+            for (let i = 0; i < 3; i += 1) {
+                const maskRow = document.createElement("div");
+                maskRow.classList.add(`row-${i}`);
+                for (let j = 0; j < 3; j += 1) {
+                    const maskColumn = document.createElement("input");
+                    maskColumn.type = 'number';
+                    maskColumn.min = '1';
+                    maskColumn.max = '1';
+                    maskColumn.classList.add(`column-${j}`);
+                    if ( i === j && i === 1 ) {
+                        maskColumn.defaultValue = '1';
+                        maskColumn.disabled = true;
+                    }
+                    maskRow.appendChild(maskColumn);
+                }
+                maskContainer.appendChild(maskRow);
+            }
+        })()
+
+    </script>
 
 </body>
 <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
@@ -71,4 +104,27 @@
 <script src="ImageWorker.js"></script>
 <script src="main.js"></script>
 <script src="handlers.js"></script>
+<script>
+    (() => {
+        const maskContainer = document.getElementsByClassName('mask')[0];
+        const button = document.createElement('button');
+        button.classList.add('btn');
+        button.classList.add('btn-primary');
+        button.innerText = 'Zamykanie';
+        button.addEventListener('click', () => {
+            const mask = [];
+            for (let i = 0; i < 3; i += 1) {
+                const row = [];
+                for (let j = 0; j < 3; j += 1) {
+                    const el = document.querySelector(`.row-${i} .column-${j}`);
+                    row.push(!!el.value ? parseInt(el.value) : 0 );
+                }
+                mask.push(row);
+            }
+            const result = CanvasWorker.getEroziaMatrix(JSON.parse(localStorage.getItem('binArray')), mask);
+            console.log(result);
+        });
+        maskContainer.appendChild(button);
+    })()
+</script>
 </html>

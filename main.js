@@ -104,7 +104,8 @@ image.addEventListener('load', () => {
 	sourceCanvas.height = image.height;
     sourceCtx.drawImage(image, 0, 0);
     const canvasWorker = new CanvasWorker(sourceCanvas);
-    const [matrix, binDataSet] = writePixelMatrix(canvasWorker);
+    const [matrix, binDataSet, aBinArray] = writePixelMatrix(canvasWorker);
+    localStorage.setItem('binArray', JSON.stringify(aBinArray));
     imageMatrixSpan.innerHTML = matrix;
     const doc = document.getElementsByClassName('pixel-edit');
     let isChanged = false;
@@ -317,7 +318,7 @@ const writePixelMatrix = (canvasWorker) => {
 			sPixelMatrix += numberDecoratorSave(aBinArray[i][j]);
 		}
 	}
-	return [sPixelMatrix, binDataSet];
+	return [sPixelMatrix, binDataSet, aBinArray];
 };
 
 const writePixelMatrixNew = (canvasWorker) => {
