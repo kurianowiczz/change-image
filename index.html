@@ -61,16 +61,17 @@
             <canvas class="gistograma"></canvas>
             <canvas class="gistograma"></canvas>
         </div>
-<!--            <div>-->
-<!--                <input id="sizeX">-->
-<!--                x-->
-<!--                <input id="sizeY">-->
-<!--                <button class="btn btn-primary">Generate</button>-->
-<!--            </div>-->
 
-            <div class="mask">
+            <div class="mask"></div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; grid-column-gap: 20px">
+                <div class="erozia">
 
+                </div>
+                <div class="rashirenie">
+
+                </div>
             </div>
+
         </div>
     </div>
     <script>
@@ -122,7 +123,21 @@
                 mask.push(row);
             }
             const result = CanvasWorker.getEroziaMatrix(JSON.parse(localStorage.getItem('binArray')), mask);
-            console.log(result);
+            const result2 = CanvasWorker.getRashirenieMatrix(JSON.parse(localStorage.getItem('binArray')), mask);
+            const results = [result, result2];
+            const eroziaContainer = document.getElementsByClassName('erozia')[0];
+            const rashirenieContainer = document.getElementsByClassName('rashirenie')[0];
+            [eroziaContainer, rashirenieContainer].forEach((container, index) => {
+                container.setAttribute('style', `
+                    display: grid;
+                    grid-template-columns: repeat(${results[index].length}, max-content);
+                    grid-gap: 3px 3px;
+                    `);
+                const inner = results[index].map(row => row.map(el => numberDecoratorSave(el)).join('')).join('');
+                console.log(inner);
+                container.innerHTML = inner;
+            });
+
         });
         maskContainer.appendChild(button);
     })()

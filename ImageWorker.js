@@ -305,16 +305,57 @@ class CanvasWorker {
 				if (binMatrix[i][j] === 1) {
 					const res = [];
 					for (const [diffI, diffJ] of watchingIndexes) {
-						if (binMatrix[i - diffI] && [0,1].includes(binMatrix[i - diffI][j - diffJ]) ) {
-							if (binMatrix[i - diffI][j - diffJ] === 1) {
+						if (binMatrix[i + diffI] && binMatrix[i + diffI][j + diffJ] !== undefined) {
+							if (binMatrix[i + diffI][j + diffJ] === 1) {
 								res.push(true);
 							} else {
 								res.push(false);
 							}
+						} else {
+							res.push(false);
 						}
 					}
-					console.log(res)
+
 					if (res.every(el => !!el)) {
+						resultRow.push(1);
+					} else {
+						resultRow.push(0);
+					}
+				} else {
+					resultRow.push(0);
+				}
+			}
+			resultMatrix.push(resultRow);
+		}
+		return resultMatrix;
+	}
+
+	static getRashirenieMatrix (binMatrix, mask) {
+		const watchingIndexes = [], resultMatrix = [];
+		for (let i = 0; i < mask.length; i += 1) {
+			for (let j = 0; j < mask[i].length; j += 1) {
+				if (mask[i][j] === 1 && !(i === j && i === 1)) {
+					watchingIndexes.push([i - 1, j - 1]);
+				}
+			}
+		}
+		for (let i = 0; i < binMatrix.length; i += 1) {
+			const resultRow = [];
+			for (let j = 0; j < binMatrix[i].length; j += 1) {
+				if (binMatrix[i][j] === 0) {
+					const res = [];
+					for (const [diffI, diffJ] of watchingIndexes) {
+						if (binMatrix[i + diffI] && binMatrix[i + diffI][j + diffJ] !== undefined) {
+							if (binMatrix[i + diffI][j + diffJ] === 1) {
+								res.push(true);
+							} else {
+								res.push(false);
+							}
+						} else {
+							res.push(false);
+						}
+					}
+					if (res.some(el => !!el)) {
 						resultRow.push(1);
 					} else {
 						resultRow.push(0);

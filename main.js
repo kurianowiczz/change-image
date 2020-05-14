@@ -24,8 +24,10 @@ const gistograms = document.getElementsByClassName('gistograma');
 const shadeImage = canvasWorker => {
 	const [newMatrix, rastushevkaDataSet] = writePixelMatrixNew(canvasWorker);
     const newMatrixDistance = writePixelMatrixDistance(canvasWorker);
+
     imageMatrixSpanNew.innerHTML = newMatrix;
     imageMatrixSpanDistance.innerHTML = newMatrixDistance;
+
     imageMatrixSpanNew.setAttribute('style', `
     display: grid;
     grid-template-columns: repeat(${canvasWorker.getWidth()}, max-content);
@@ -97,7 +99,7 @@ const binarizeImage = (canvasWorker, iThreshold) => {
             },
         },
     );
-}
+};
 
 image.addEventListener('load', () => {
 	sourceCanvas.width = image.width;
@@ -309,16 +311,16 @@ const writeBinarizedMatrix = (canvasWorker, iThreshold) => {
 };
 
 const writePixelMatrix = (canvasWorker) => {
-	const binDataSet = [];
-	let sPixelMatrix = '';
-	let aBinArray = canvasWorker.getBinArray();
-	for (let i = 0; i < aBinArray.length; i++) {
-		for (let j = 0; j < aBinArray[0].length; j++) {
-			binDataSet.push(aBinArray[i][j]);
-			sPixelMatrix += numberDecoratorSave(aBinArray[i][j]);
-		}
-	}
-	return [sPixelMatrix, binDataSet, aBinArray];
+    const binDataSet = [];
+    let sPixelMatrix = '';
+    let aBinArray = canvasWorker.getBinArray();
+    for (let i = 0; i < aBinArray.length; i++) {
+        for (let j = 0; j < aBinArray[0].length; j++) {
+            binDataSet.push(aBinArray[i][j]);
+            sPixelMatrix += numberDecoratorSave(aBinArray[i][j]);
+        }
+    }
+    return [sPixelMatrix, binDataSet, aBinArray];
 };
 
 const writePixelMatrixNew = (canvasWorker) => {
@@ -334,19 +336,18 @@ const writePixelMatrixNew = (canvasWorker) => {
 			sPixelMatrix += numberDecoratorNew(aShadedImageAndData[0][i][j]);
 		}
 	}
-	// console.log('sp', sPixelMatrix);
 	return [sPixelMatrix, rastushevkaDataSet];
 };
 
 const writePixelMatrixDistance = (canvasWorker) => {
-	let sPixelMatrix = '';
-	let aDistanceArray = canvasWorker.shadeImage();
-	for (let i = 0; i < aDistanceArray[2].length; i++) {
-		for (let j = 0; j < aDistanceArray[2][0].length; j++) {
-			sPixelMatrix += numberDecorator(aDistanceArray[2][i][j]);
-		}
-	}
-	return sPixelMatrix;
+    let sPixelMatrix = '';
+    let aDistanceArray = canvasWorker.shadeImage();
+    for (let i = 0; i < aDistanceArray[2].length; i++) {
+        for (let j = 0; j < aDistanceArray[2][0].length; j++) {
+            sPixelMatrix += numberDecorator(aDistanceArray[2][i][j]);
+        }
+    }
+    return sPixelMatrix;
 };
 
 const isBlackPixel = (pixel) => [0, 0, 0, 255].equals(pixel);
