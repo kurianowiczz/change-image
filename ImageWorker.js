@@ -159,6 +159,42 @@ class CanvasWorker {
 		return [oImageData, aBinMatrix];
 	}
 
+    filterHalftoneWithMedian() {
+    	let aHalftoneMatrix = this.getHalftoneMatrix(),
+    	    aFilteredHalftoneMatrix = [];
+    	aHalftoneMatrix.forEach((aRow, iX) => {
+    		aFilteredHalftoneMatrix.push([]);
+    		if (!this._isExtreme(aHalftoneMatrix, iX)) {
+    			aRow.forEach((iPixel, iY) => {
+    				if (!this._isExtreme(aRow, iY)) {
+    				    let aSurroundingPixels = this.getSurroundingHalftonePixels(iX, iY, 1),
+    				        aSlidingWindow = aSurroundingPixels;
+    				    aSlidingWindow.push({iX: iX, iY: iY, value: iPixel});
+    				    aSlidingWindow = aSlidingWindow
+    				                        .sort((oPixel1, oPixel2) => oPixel1.value - oPixel2.value);
+    				    aFilteredHalftoneMatrix[iX][iY] = aSlidingWindow[4].value;
+    				    this.setPixel(this._formGrayPixel(aSlidingWindow[4].value), iX, iY);
+    				} else {
+    					aFilteredHalftoneMatrix[iX][iY] = aHalftoneMatrix[iX][iY];
+    					this.setPixel(this._formGrayPixel(aHalftoneMatrix[iX][iY]), iX, iY);
+    				}
+    			});
+    		} else {
+    			aFilteredHalftoneMatrix[iX] = aHalftoneMatrix[iX];
+    			aHalftoneMatrix[iX].forEach((iPixel, iY) => {
+    				this.setPixel(aHalftoneMatrix[iX][iY]);
+    			});
+    		}
+    	});
+    	let oImageData = this._oImageData;
+		this.resetImageData();
+		return [oImageData, aFilteredHalftoneMatrix];
+    }
+
+    _isExtreme(aArr, iIndex) {
+    	return iIndex === 0 || iIndex === aArr.length - 1;
+    }
+
 	_formGrayPixel(iGreyScale) {
 		return [iGreyScale, iGreyScale, iGreyScale, 255];
 	}

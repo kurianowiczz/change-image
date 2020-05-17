@@ -7,8 +7,10 @@ Array.prototype.equals = equals;
 
 const sourceCanvas = document.getElementsByClassName('source-img')[0],
 	finishCanvas = document.getElementsByClassName('finish-img')[0],
+	filteredHalftoneCanvas = document.getElementsByClassName('filtered-halftone')[0],
 	sourceCtx = sourceCanvas.getContext('2d'),
 	finishCtx = finishCanvas.getContext('2d'),
+	filteredHalftoneCtx = filteredHalftoneCanvas.getContext('2d'),
     image = new Image(),
     halftoneImage = new Image(),
     binaryImageFileInput = document.getElementsByClassName('binary-image-file-input')[0],
@@ -19,9 +21,30 @@ const sourceCanvas = document.getElementsByClassName('source-img')[0],
 	binarizeThresholdInput = document.getElementsByClassName('binarize-threshold-input')[0],
 	binarizeThresholdInputLabel = document.getElementsByClassName('binarize-threshold-input-label')[0];
 
-let jqMaskContainer;
+let jqMaskContainer,
+    jqfilteredHalftoneCanvas = $(filteredHalftoneCanvas),
+    jqfilteredHalftoneMatrix;
 
 const gistograms = document.getElementsByClassName('gistograma');
+
+const filterHalftoneWithMedian = canvasWorker => {
+	let [oFilteredHalftoneImageData, aFilteredHalftoneMatrix] = canvasWorker.filterHalftoneWithMedian(),
+	    sPixelMatrix = '';
+	filteredHalftoneCanvas.width = finishCanvas.width;
+	filteredHalftoneCanvas.height = finishCanvas.height;
+	filteredHalftoneCtx.putImageData(oFilteredHalftoneImageData, 0, 0);
+	for (let i = 0; i < aFilteredHalftoneMatrix.length; i++) {
+        for (let j = 0; j < aFilteredHalftoneMatrix[0].length; j++) {
+            sPixelMatrix += numberDecoratorFilter(aFilteredHalftoneMatrix[i][j]);
+        }
+    }
+    jqfilteredHalftoneMatrix.html(sPixelMatrix);
+	jqfilteredHalftoneMatrix.attr('style', `
+    display: grid;
+    grid-template-columns: repeat(${canvasWorker.getWidth()}, max-content);
+    grid-gap: 3px 3px;
+    `);
+};
 
 const shadeImage = canvasWorker => {
 	const [newMatrix, rastushevkaDataSet] = writePixelMatrixNew(canvasWorker);
@@ -104,6 +127,8 @@ const binarizeImage = (canvasWorker, iThreshold) => {
 };
 
 image.addEventListener('load', () => {
+	jqfilteredHalftoneCanvas.addClass('hidden');
+	jqfilteredHalftoneMatrix.remove();
 	jqMaskContainer.removeClass('hidden');
 	sourceCanvas.width = image.width;
 	sourceCanvas.height = image.height;
@@ -188,6 +213,11 @@ image.addEventListener('load', () => {
 });
 
 halftoneImage.addEventListener('load', () => {
+	jqfilteredHalftoneCanvas.removeClass('hidden');
+	jqfilteredHalftoneMatrix = $(`<div class="matrixContainer">
+    <div class="filtered-halftone-image" style="display: grid;"></div>
+</div>`);
+	$(".matrixContainers").append(jqfilteredHalftoneMatrix);
 	jqMaskContainer.addClass('hidden');
 	finishCanvas.width = halftoneImage.width;
 	finishCanvas.height = halftoneImage.height;
@@ -222,6 +252,7 @@ halftoneImage.addEventListener('load', () => {
         },
     );
     binarizeImage(canvasWorker);
+    filterHalftoneWithMedian(canvasWorker);
 });
 
 binaryImageFileInput.addEventListener('change', () => {
@@ -247,6 +278,21 @@ const numberDecorator = (num) => `
 
 const numberDecoratorNew = (num) => `
 <div style="
+	width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: rgb(${new Array(3).fill(255 - num > 127 ? 255 : 0).join(', ')});
+	background-color: rgb(${new Array(3).fill(num).join(', ')});
+	border-radius: 3px;
+	">
+	${Math.round(num)}
+</div>
+`;
+
+const numberDecoratorFilter = (num) => `
+<div class="filter-pixel" style="
 	width: 32px;
 	height: 32px;
 	display: flex;
