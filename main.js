@@ -19,6 +19,8 @@ const sourceCanvas = document.getElementsByClassName('source-img')[0],
 	binarizeThresholdInput = document.getElementsByClassName('binarize-threshold-input')[0],
 	binarizeThresholdInputLabel = document.getElementsByClassName('binarize-threshold-input-label')[0];
 
+let jqMaskContainer;
+
 const gistograms = document.getElementsByClassName('gistograma');
 
 const shadeImage = canvasWorker => {
@@ -102,6 +104,7 @@ const binarizeImage = (canvasWorker, iThreshold) => {
 };
 
 image.addEventListener('load', () => {
+	jqMaskContainer.removeClass('hidden');
 	sourceCanvas.width = image.width;
 	sourceCanvas.height = image.height;
     sourceCtx.drawImage(image, 0, 0);
@@ -185,6 +188,7 @@ image.addEventListener('load', () => {
 });
 
 halftoneImage.addEventListener('load', () => {
+	jqMaskContainer.addClass('hidden');
 	finishCanvas.width = halftoneImage.width;
 	finishCanvas.height = halftoneImage.height;
     finishCtx.drawImage(halftoneImage, 0, 0);

@@ -17,6 +17,10 @@
 	margin-bottom: 10px;
 }
 
+.hidden {
+	display: none;
+}
+
 /*.container {
 	display: fds;
 }*/
