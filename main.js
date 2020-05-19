@@ -23,7 +23,9 @@ const sourceCanvas = document.getElementsByClassName('source-img')[0],
 
 let jqMaskContainer,
     jqfilteredHalftoneCanvas = $(filteredHalftoneCanvas),
-    jqfilteredHalftoneMatrix;
+    jqfilteredHalftoneMatrix = $(`<div class="matrixContainer">
+    <div class="filtered-halftone-image" style="display: grid;"></div>
+</div>`);
 
 const gistograms = document.getElementsByClassName('gistograma');
 
