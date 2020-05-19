@@ -212,7 +212,7 @@ image.addEventListener('load', () => {
     shadeImage(canvasWorker);
 });
 
-halftoneImage.addEventListener('load', () => {
+halftoneImage.addEventListener('load', async () => {
 	jqfilteredHalftoneCanvas.removeClass('hidden');
 	jqfilteredHalftoneMatrix = $(`<div class="matrixContainer">
     <div class="filtered-halftone-image" style="display: grid;"></div>
@@ -347,6 +347,8 @@ const writeBinarizedMatrix = (canvasWorker, iThreshold) => {
 		iThresholdCopy = 255 - iThresholdCopy;
 		binarizeThresholdInputLabel.innerHTML = "Choose Threshold: " + Math.round(iThresholdCopy);
 	}
+	sourceCanvas.width = halftoneImage.width;
+	sourceCanvas.height = halftoneImage.height;
 	const binDataSet = [];
 	let sPixelMatrix = '';
 	let [oImageData, aBinArray] = canvasWorker.binarizeImage(iThresholdCopy);
