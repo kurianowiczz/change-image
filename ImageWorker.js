@@ -101,6 +101,19 @@ class CanvasWorker {
         return aHalftoneMatrix;
     }
 
+    getColorMatrix() {
+        let aColorMatrix = [];
+        for (let i = 0; i < this.getHeight(); i += 1) {
+            aColorMatrix[i] = [];
+            for (let j = 0; j < this.getWidth(); j++) {
+                let pixel = this.getPixel(i, j);
+                aColorMatrix[i][j] = pixel;
+            }
+            console.log(aColorMatrix[i])
+        }
+        return aColorMatrix;
+    }
+
     shadeImage() {
         let aBinArray = this.getBinArray();
         let aShadedArray = [];

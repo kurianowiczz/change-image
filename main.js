@@ -13,10 +13,13 @@ const sourceCanvas = document.getElementsByClassName('source-img')[0],
 	filteredHalftoneCtx = filteredHalftoneCanvas.getContext('2d'),
     image = new Image(),
     halftoneImage = new Image(),
+    colorImage = new Image(),
     binaryImageFileInput = document.getElementsByClassName('binary-image-file-input')[0],
     halftoneImageFileInput = document.getElementsByClassName('halftone-image-file-input')[0],
+    colorImageFileInput = document.getElementsByClassName('color-image-file-input')[0],
 	imageMatrixSpan = document.getElementsByClassName('imageMatrix')[0],
 	imageMatrixSpanNew = document.getElementsByClassName('imageMatrixNew')[0],
+	imageMatrixSpanNewColor = document.getElementsByClassName('imageMatrixNewColor')[0],
 	imageMatrixSpanDistance = document.getElementsByClassName('imageMatrixNewDistance')[0],
 	binarizeThresholdInput = document.getElementsByClassName('binarize-threshold-input')[0],
 	binarizeThresholdInputLabel = document.getElementsByClassName('binarize-threshold-input-label')[0];
@@ -48,8 +51,47 @@ const filterHalftoneWithMedian = canvasWorker => {
     `);
 };
 
+const binarizeImage = (canvasWorker, iThreshold) => {
+    const [matrix, binDataSet] = writeBinarizedMatrix(canvasWorker, iThreshold);
+    imageMatrixSpan.innerHTML = matrix;
+    imageMatrixSpan.setAttribute('style', `
+    display: grid;
+    grid-template-columns: repeat(${canvasWorker.getWidth()}, max-content);
+    grid-gap: 3px 3px;
+    `);
+    const binary = {};
+    for (const bin of binDataSet) {
+        if (binary[bin]) {
+            binary[bin] += 1;
+        } else {
+            binary[bin] = 1;
+        }
+    }
+    const chart1 = new Chart(
+        gistograms[0].getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: Object.keys(binary),
+                datasets: [{
+                    label: 'binary',
+                    data: Object.values(binary),
+                }],
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            suggestedMin: 0,
+                        },
+                    }],
+                },
+            },
+        },
+    );
+};
+
 const shadeImage = canvasWorker => {
-	const [newMatrix, rastushevkaDataSet] = writePixelMatrixNew(canvasWorker);
+    const [newMatrix, rastushevkaDataSet] = writePixelMatrixNew(canvasWorker);
     const newMatrixDistance = writePixelMatrixDistance(canvasWorker);
 
     imageMatrixSpanNew.innerHTML = newMatrix;
@@ -89,30 +131,31 @@ const shadeImage = canvasWorker => {
     );
 };
 
-const binarizeImage = (canvasWorker, iThreshold) => {
-    const [matrix, binDataSet] = writeBinarizedMatrix(canvasWorker, iThreshold);
-    imageMatrixSpan.innerHTML = matrix;
-    imageMatrixSpan.setAttribute('style', `
+const colorfulImage = (canvasWorker) => {
+    const [matrixColor, colorDataSet] = writeColorMatrix(canvasWorker);
+    imageMatrixSpanNewColor.innerHTML = matrixColor;
+    imageMatrixSpanNewColor.setAttribute('style', `
     display: grid;
     grid-template-columns: repeat(${canvasWorker.getWidth()}, max-content);
     grid-gap: 3px 3px;
     `);
-    const binary = {};
-    for (const bin of binDataSet) {
-        if (binary[bin]) {
-            binary[bin] += 1;
+
+    const colorful = {};
+    for (const color of colorDataSet) {
+        if (colorful[color]) {
+            colorful[color] += 1;
         } else {
-            binary[bin] = 1;
+            colorful[color] = 1;
         }
     }
-    const chart1 = new Chart(
+    const chart3 = new Chart(
         gistograms[0].getContext('2d'), {
             type: 'bar',
             data: {
-                labels: Object.keys(binary),
+                labels: Object.keys(colorful),
                 datasets: [{
-                    label: 'binary',
-                    data: Object.values(binary),
+                    label: 'color',
+                    data: Object.values(colorful),
                 }],
             },
             options: {
@@ -257,6 +300,51 @@ halftoneImage.addEventListener('load', async () => {
     filterHalftoneWithMedian(canvasWorker);
 });
 
+colorImage.addEventListener('load', () => {
+    sourceCanvas.width = colorImage.width;
+    sourceCanvas.height = colorImage.height;
+    sourceCtx.drawImage(colorImage, 0, 0);
+    const canvasWorker = new CanvasWorker(sourceCanvas);
+    const [matrixColor, colorDataSet, aColorMatrix] = writeColorMatrix(canvasWorker);
+    imageMatrixSpanNewColor.innerHTML = matrixColor;
+    console.log(canvasWorker.getWidth())
+    imageMatrixSpanNewColor.setAttribute('style', `
+    display: grid;
+    grid-template-columns: repeat(${canvasWorker.getWidth()}, max-content);
+    grid-gap: 1px 1px;
+    `);
+    const colorful = {};
+    for (const color of colorDataSet) {
+        if (colorful[color]) {
+            colorful[color] += 1;
+        } else {
+            colorful[color] = 1;
+        }
+    }
+    const chart3 = new Chart(
+        gistograms[0].getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: Object.keys(colorful),
+                datasets: [{
+                    label: 'color',
+                    data: Object.values(colorful),
+                }],
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            suggestedMin: 0,
+                        },
+                    }],
+                },
+            },
+        },
+    );
+    // shadeImage(canvasWorker);
+});
+
 binaryImageFileInput.addEventListener('change', () => {
 	image.src = "";
 	image.src = window.URL.createObjectURL(binaryImageFileInput.files[0]);
@@ -265,6 +353,11 @@ binaryImageFileInput.addEventListener('change', () => {
 halftoneImageFileInput.addEventListener('change', () => {
 	halftoneImage.src = "";
 	halftoneImage.src = window.URL.createObjectURL(halftoneImageFileInput.files[0]);
+});
+
+colorImageFileInput.addEventListener('change', () => {
+	colorImage.src = "";
+	colorImage.src = window.URL.createObjectURL(colorImageFileInput.files[0]);
 });
 
 const numberDecorator = (num) => `
@@ -320,6 +413,22 @@ const numberDecoratorSave = (num) => `
 </div>
 `;
 
+const numberDecoratorColor = (num) => {
+    const labels = ['red', 'green', 'blue', 'alpha'];
+    return`
+<div class="pixel-edit" style="
+	background-color: rgba(${num.toString()});
+	color: black;
+	cursor: default;
+	width: 2px;
+	height: 2px;
+	"
+	onclick="alert('${num.map((color, index) => labels[index] + ': ' + color).join(', ')}')"
+	>
+</div>
+`;
+}
+
 const writeHalfToneMatrix = (canvasWorker) => {
 	const rastushevkaDataSet = [];
 	let sPixelMatrix = '';
@@ -331,6 +440,19 @@ const writeHalfToneMatrix = (canvasWorker) => {
 		}
 	}
 	return [sPixelMatrix, rastushevkaDataSet];
+};
+
+const writeColorMatrix = (canvasWorker) => {
+    const colorDataSet = [];
+    let sPixelMatrix = '';
+    let aColorMatrix = canvasWorker.getColorMatrix();
+    for (let i = 0; i < aColorMatrix.length; i += 1) {
+        for (let j = 0; j < aColorMatrix[0].length; j++) {
+            colorDataSet.push(aColorMatrix[i][j]);
+            sPixelMatrix += numberDecoratorColor(aColorMatrix[i][j]);
+        }
+    }
+    return [sPixelMatrix, colorDataSet, aColorMatrix];
 };
 
 const writeBinarizedMatrix = (canvasWorker, iThreshold) => {

@@ -24,6 +24,7 @@
           <div class="custom-file">
             <input type="file" class="custom-file-input binary-image-file-input" id="inputGroupFile01" aria-describedby="inputGroupFileAddon01">
             <label class="custom-file-label" for="inputGroupFile01">Choose Binary Image</label>
+          </div>
         </div>
         <div class="input-group mb-3">
           <div class="input-group-prepend">
@@ -33,6 +34,15 @@
             <input type="file" class="custom-file-input halftone-image-file-input" id="inputGroupFile02" aria-describedby="inputGroupFileAddon03">
             <label class="custom-file-label" for="inputGroupFile02">Choose Halftone Image</label>
           </div>
+        </div>
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <button class="btn btn-primary shadeImage">Shade image</button>
+            </div>
+            <div class="custom-file">
+                <input type="file" class="custom-file-input color-image-file-input" id="inputGroupFile03" aria-describedby="inputGroupFileAddon03">
+                <label class="custom-file-label" for="inputGroupFile02">Choose Color Image</label>
+            </div>
         </div>
         <div class="input-group">
             <label for="formControlRange" class="binarize-threshold-input-label">Choose Threshold: 128</label>
@@ -60,12 +70,15 @@
             <div class="matrixContainer">
                 <div class="filtered-halftone-image" style="display: grid;"></div>
             </div>
+            <div class="matrixContainer">
+                <div class="imageMatrixNewColor" style="display: grid;"></div>
+            </div>
         </div><br>
         <div>
             <canvas class="gistograma"></canvas>
             <canvas class="gistograma"></canvas>
         </div>
-
+        <div>
             <div class="mask"></div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; grid-column-gap: 20px">
                 <div class="erozia">
@@ -75,7 +88,6 @@
 
                 </div>
             </div>
-
         </div>
     </div>
 
