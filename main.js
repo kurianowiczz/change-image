@@ -8,6 +8,7 @@ Array.prototype.equals = equals;
 const sourceCanvas = document.getElementsByClassName('source-img')[0],
 	finishCanvas = document.getElementsByClassName('finish-img')[0],
 	filteredHalftoneCanvas = document.getElementsByClassName('filtered-halftone')[0],
+    downloadsCanvasColor = document.getElementsByClassName('color-img')[0],
 	sourceCtx = sourceCanvas.getContext('2d'),
 	finishCtx = finishCanvas.getContext('2d'),
 	filteredHalftoneCtx = filteredHalftoneCanvas.getContext('2d'),
@@ -420,8 +421,8 @@ const numberDecoratorColor = (num) => {
 	background-color: rgba(${num.toString()});
 	color: black;
 	cursor: default;
-	width: 2px;
-	height: 2px;
+	width: 3px;
+	height: 3px;
 	"
 	onclick="alert('${num.map((color, index) => labels[index] + ': ' + color).join(', ')}')"
 	>

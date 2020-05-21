@@ -23,7 +23,6 @@ saveBtnNew.addEventListener('click', () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-
 });
 
 const shadeImageBtn = document.getElementsByClassName('shadeImage')[0];
