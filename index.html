@@ -53,6 +53,23 @@
             <button class="btn btn-primary saveBtnNew">Save Binary Image</button>
             <button class="btn btn-primary saveBtnColor">Save Color Image</button>
         </div><br>
+        <div class="color-range">
+            <div class="color-red">
+                <input type="range" id="red" name="red"
+                    min="0" max="255">
+                <label for="red">Red</label>
+            </div>
+            <div class="color-green">
+                <input type="range" id="green" name="green"
+                    min="0" max="255">
+                <label for="green">Green</label>
+            </div>
+            <div class="color-blue">
+                <input type="range" id="blue" name="blue"
+                    min="0" max="255">
+                <label for="blue">Blue</label>
+            </div>
+        </div>
         <div class="images">
             <canvas class="source-img"></canvas>
             <canvas class="finish-img"></canvas>
