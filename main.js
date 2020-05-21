@@ -21,6 +21,9 @@ const sourceCanvas = document.getElementsByClassName('source-img')[0],
 	imageMatrixSpan = document.getElementsByClassName('imageMatrix')[0],
 	imageMatrixSpanNew = document.getElementsByClassName('imageMatrixNew')[0],
 	imageMatrixSpanNewColor = document.getElementsByClassName('imageMatrixNewColor')[0],
+	imageMatrixSpanNewColorRed = document.getElementsByClassName('imageMatrixNewColorRed')[0],
+	imageMatrixSpanNewColorGreen = document.getElementsByClassName('imageMatrixNewColorGreen')[0],
+	imageMatrixSpanNewColorBlue = document.getElementsByClassName('imageMatrixNewColorBlue')[0],
 	imageMatrixSpanDistance = document.getElementsByClassName('imageMatrixNewDistance')[0],
 	binarizeThresholdInput = document.getElementsByClassName('binarize-threshold-input')[0],
 	binarizeThresholdInputLabel = document.getElementsByClassName('binarize-threshold-input-label')[0];
@@ -133,7 +136,7 @@ const shadeImage = canvasWorker => {
 };
 
 const colorfulImage = (canvasWorker) => {
-    const [matrixColor, colorDataSet] = writeColorMatrix(canvasWorker);
+    const [matrixColor, colorDataSet] = writeColorMatrixRed(canvasWorker);
     imageMatrixSpanNewColor.innerHTML = matrixColor;
     imageMatrixSpanNewColor.setAttribute('style', `
     display: grid;
@@ -299,6 +302,7 @@ halftoneImage.addEventListener('load', async () => {
     );
     binarizeImage(canvasWorker);
     filterHalftoneWithMedian(canvasWorker);
+    colorfulImage(canvasWorker);
 });
 
 colorImage.addEventListener('load', () => {
@@ -306,14 +310,26 @@ colorImage.addEventListener('load', () => {
     sourceCanvas.height = colorImage.height;
     sourceCtx.drawImage(colorImage, 0, 0);
     const canvasWorker = new CanvasWorker(sourceCanvas);
-    const [matrixColor, colorDataSet, aColorMatrix] = writeColorMatrix(canvasWorker);
-    imageMatrixSpanNewColor.innerHTML = matrixColor;
-    console.log(canvasWorker.getWidth())
-    imageMatrixSpanNewColor.setAttribute('style', `
+    const [matrixColor, colorDataSet, aColorMatrix, sRed, sGreen, sBlue] = writeColorMatrix(canvasWorker);
+    // imageMatrixSpanNewColor.innerHTML = matrixColor;
+    // imageMatrixSpanNewColor.setAttribute('style', `
+    // display: grid;
+    // grid-template-columns: repeat(${canvasWorker.getWidth()}, max-content);
+    // grid-gap: 1px 1px;
+    // `);
+
+    const inners = [matrixColor, sRed, sGreen, sBlue];
+    [imageMatrixSpanNewColor, imageMatrixSpanNewColorRed, imageMatrixSpanNewColorGreen, imageMatrixSpanNewColorBlue]
+        .forEach((el, i) => {
+            console.log(el)
+            el.setAttribute('style', `
     display: grid;
     grid-template-columns: repeat(${canvasWorker.getWidth()}, max-content);
     grid-gap: 1px 1px;
     `);
+            el.innerHTML = inners[i];
+        });
+
     const colorful = {};
     for (const color of colorDataSet) {
         if (colorful[color]) {
@@ -430,6 +446,20 @@ const numberDecoratorColor = (num) => {
 `;
 }
 
+const numberDecoratorRGB = (num, position) => {
+    return`
+<div class="pixel-edit" style="
+	background-color: rgba(${[0, 0, 0, 255].map((el, i) => i === position ? num : el)});
+	color: black;
+	cursor: default;
+	width: 3px;
+	height: 3px;
+	"
+	>
+</div>
+`;
+}
+
 const writeHalfToneMatrix = (canvasWorker) => {
 	const rastushevkaDataSet = [];
 	let sPixelMatrix = '';
@@ -445,16 +475,33 @@ const writeHalfToneMatrix = (canvasWorker) => {
 
 const writeColorMatrix = (canvasWorker) => {
     const colorDataSet = [];
-    let sPixelMatrix = '';
+    let sPixelMatrix = '', sRed = '', sGreen = '', sBlue = '';
     let aColorMatrix = canvasWorker.getColorMatrix();
     for (let i = 0; i < aColorMatrix.length; i += 1) {
         for (let j = 0; j < aColorMatrix[0].length; j++) {
             colorDataSet.push(aColorMatrix[i][j]);
             sPixelMatrix += numberDecoratorColor(aColorMatrix[i][j]);
+            sRed += numberDecoratorRGB(aColorMatrix[i][j][0], 0);
+            sGreen += numberDecoratorRGB(aColorMatrix[i][j][1], 1);
+            sBlue += numberDecoratorRGB(aColorMatrix[i][j][2], 2);
         }
     }
-    return [sPixelMatrix, colorDataSet, aColorMatrix];
+    return [sPixelMatrix, colorDataSet, aColorMatrix, sRed, sGreen, sBlue];
 };
+
+// const writeColorMatrixRed = (canvasWorker) => {
+//     const colorDataSet = [];
+//     let sPixelMatrix = '';
+//     let aColorMatrixRed = canvasWorker.getPixelsRedBrightness();
+//     console.log(aColorMatrixRed)
+//     for (let i = 0; i < aColorMatrixRed.length; i += 1) {
+//         for (let j = 0; j < aColorMatrixRed[0].length; j++) {
+//             colorDataSet.push(aColorMatrixRed[i][j]);
+//             sPixelMatrix += numberDecoratorColor(aColorMatrixRed[i][j]);
+//         }
+//     }
+//     return [sPixelMatrix, colorDataSet, aColorMatrixRed];
+// };
 
 const writeBinarizedMatrix = (canvasWorker, iThreshold) => {
 	let iThresholdCopy = iThreshold;

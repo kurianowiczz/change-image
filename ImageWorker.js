@@ -45,15 +45,15 @@ class CanvasWorker {
         return [0, 1, 2, 3].map(iColorIndex=>this._oCurrentImageData.data[iX * this._oImageData.width * 4 + iY * 4 + iColorIndex]);
     }
 
-    getPixelsRedBrighness(iX, iY) {
+    getPixelsRedBrightness(iX, iY) {
         return this.getPixel(iX, iY)[0];
     }
 
-    getPixelsGreenBrighness(iX, iY) {
+    getPixelsGreenBrigthness(iX, iY) {
         return this.getPixel(iX, iY)[1];
     }
 
-    getPixelsBlueBrighness(iX, iY) {
+    getPixelsBlueBrightness(iX, iY) {
         return this.getPixel(iX, iY)[2];
     }
 
@@ -109,7 +109,6 @@ class CanvasWorker {
                 let pixel = this.getPixel(i, j);
                 aColorMatrix[i][j] = pixel;
             }
-            console.log(aColorMatrix[i])
         }
         return aColorMatrix;
     }
