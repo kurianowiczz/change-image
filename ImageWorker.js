@@ -122,13 +122,13 @@ class CanvasWorker {
                 if (iPixel !== 1) {
                     let mPixel = this._findChessNearestValue(iX, iY, elem=>{
                         return elem.value === 1;
-                    }
+                    }, aBinArray
                     );
                     aShadedArray[iX][iY] = -this.getChessLength(iX, iY, mPixel.iX, mPixel.iY);
-                } else if (this._getSurroundingValue(iX, iY, 0) === undefined) {
+                } else if (this._getSurroundingValue(iX, iY, 0, aBinArray) === undefined) {
                     let mPixel = this._findChessNearestValue(iX, iY, elem=>{
-                        return elem.value === 1 && this._getSurroundingValue(elem.iX, elem.iY, 0) !== undefined;
-                    }
+                        return elem.value === 1 && this._getSurroundingValue(elem.iX, elem.iY, 0, aBinArray) !== undefined;
+                    }, aBinArray
                     );
                     aShadedArray[iX][iY] = this.getChessLength(iX, iY, mPixel.iX, mPixel.iY) + 1;
                 } else {
@@ -227,7 +227,7 @@ class CanvasWorker {
     getHalftoneFromColored() {
         let aHalftoneMatrix = this._createArray(this.getWidth(), this.getHeight());
         aHalftoneMatrix.forEach((aRow, iX) => {
-            aRow = aRow.map((iPixel, iY) => {
+            aHalftoneMatrix[iX] = aRow.map((iPixel, iY) => {
                 let aPixel = this.getPixel(iX, iY);
                 let iGrayBrightness = Math.max(aPixel[0], aPixel[1], aPixel[2]);
                 this.setPixel(this._formGrayPixel(iGrayBrightness), iX, iY);
@@ -276,28 +276,31 @@ class CanvasWorker {
     _createArray(length) {
         var arr = new Array(length || 0)
           , i = length;
+        for (let i = 0; i < length; i++) {
+            arr[i] = null;
+        }
 
         if (arguments.length > 1) {
             var args = Array.prototype.slice.call(arguments, 1);
             while (i--)
-                arr[length - 1 - i] = createArray.apply(this, args);
+                arr[length - 1 - i] = this._createArray.apply(this, args);
         }
 
         return arr;
     }
 
-    _findChessNearestValue(iX, iY, fCondition) {
+    _findChessNearestValue(iX, iY, fCondition, aBinArray) {
         let mPixel = undefined;
         let iWave = 1;
         while (mPixel === undefined) {
-            mPixel = this.getSurroundingPixels(iX, iY, iWave).find(fCondition);
+            mPixel = this.getSurroundingPixels(iX, iY, iWave, aBinArray).find(fCondition);
             iWave++;
         }
         return mPixel;
     }
 
-    _getSurroundingValue(iX, iY, value) {
-        return this.getSurroundingPixels(iX, iY, 1).find(elem=>elem.value === value);
+    _getSurroundingValue(iX, iY, value, aBinArray) {
+        return this.getSurroundingPixels(iX, iY, 1, aBinArray).find(elem=>elem.value === value);
     }
 
     getChessLength(iX1, iY1, iX2, iY2) {
@@ -313,8 +316,7 @@ class CanvasWorker {
 
     }
 
-    getSurroundingPixels(iX, iY, iWave) {
-        let aBinArray = this.getBinArray();
+    getSurroundingPixels(iX, iY, iWave, aBinArray) {
         let aSurroundingPixels = [];
         let iTempX = iWave;
         let iTempY = iWave;

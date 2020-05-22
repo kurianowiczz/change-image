@@ -36,14 +36,18 @@ binarizeThresholdInput.addEventListener('input', () => {
 });
 
 binarizeThresholdInput.addEventListener('change', () => {
-    const canvasWorker = new CanvasWorker(finishCanvas);
-    binarizeImage(canvasWorker, binarizeThresholdInput.value);
+    const canvasWorker = new CanvasWorker(shadedImageCanvas);
+    const binCanvasWorker = new CanvasWorker(binarizedCanvas);
+    binarizeImage2(canvasWorker, binarizeThresholdInput.value);
+    shadeImage2(binCanvasWorker);
 })
 
 let binarizeImageBtn = document.getElementsByClassName('binarizeImage')[0];
 binarizeImageBtn.addEventListener('click', () => {
-    const canvasWorker = new CanvasWorker(finishCanvas);
-    binarizeImage(canvasWorker); 
+    const canvasWorker = new CanvasWorker(shadedImageCanvas);
+    const binCanvasWorker = new CanvasWorker(binarizedCanvas);
+    binarizeImage2(canvasWorker);
+    shadeImage2(binCanvasWorker); 
 });
 
 
